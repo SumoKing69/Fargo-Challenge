@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fargo Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f3f4f6;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        .chat-header {
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #007BFF;
+            color: white;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .message.user {
+            align-self: flex-end;
+            background-color: #d1e7ff;
+            color: #084298;
+        }
+        .message.bot {
+            align-self: flex-start;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        .chat-footer {
+            padding: 10px 20px;
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .chat-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .chat-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Fargo Chatbox</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">Hello! How can I assist you today?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here...">
+            <button class="chat-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</body>
+
+<script>
+        async function sendMessage() {
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+    
+            const userMessage = chatInput.value.trim();
+            if (userMessage) {
+                // Display user message in chat
+                const userMessageElement = document.createElement('div');
+                userMessageElement.className = 'message user';
+                userMessageElement.textContent = userMessage;
+                chatMessages.appendChild(userMessageElement);
+    
+                // Send user message to Flask backend
+                const response = await fetch('/chatbot_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_message: userMessage }),
+                });
+    
+                // Fetch chatbot response and display it
+                const data = await response.json();
+                const botMessageElement = document.createElement('div');
+                botMessageElement.className = 'message bot';
+                botMessageElement.textContent = data.bot_response;  // Display the bot's response
+                chatMessages.appendChild(botMessageElement);
+    
+                // Scroll to the bottom of the chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+                // Clear input
+                chatInput.value = '';
+            }
+        }
+        
+</script>
+</html>

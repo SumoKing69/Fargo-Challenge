@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fargo Voice Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f3f4f6;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        .chat-header {
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #007BFF;
+            color: white;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .message.user {
+            align-self: flex-end;
+            background-color: #d1e7ff;
+            color: #084298;
+        }
+        .message.bot {
+            align-self: flex-start;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        .chat-footer {
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            display: flex;
+        }
+        .chat-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 0 0 10px 10px;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: center;
+        }
+        .chat-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Fargo Voice Chat</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">Hello! How can I assist you today?</div>
+        </div>
+        <div class="chat-footer">
+            <button class="chat-button" id="voiceButton" onclick="startVoiceInput()">Click to Speak 🎤</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage(userMessage) {
+            const chatMessages = document.getElementById('chatMessages');
+
+            if (userMessage) {
+                // Display user message in chat
+                const userMessageElement = document.createElement('div');
+                userMessageElement.className = 'message user';
+                userMessageElement.textContent = userMessage;
+                chatMessages.appendChild(userMessageElement);
+
+                // Send user message to Flask backend
+                const response = await fetch('/chatbot_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_message: userMessage }),
+                });
+
+                // Fetch chatbot response and display it
+                const data = await response.json();
+                const botMessageElement = document.createElement('div');
+                botMessageElement.className = 'message bot';
+                botMessageElement.textContent = data.bot_response;
+                chatMessages.appendChild(botMessageElement);
+
+                // Scroll to the bottom of the chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function startVoiceInput() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.start();
+
+            recognition.onresult = function (event) {
+                const userMessage = event.results[0][0].transcript;
+                sendMessage(userMessage);
+            };
+
+            recognition.onerror = function (event) {
+                alert('Error occurred during speech recognition: ' + event.error);
+            };
+        }
+    </script>
+</body>
+</html>
