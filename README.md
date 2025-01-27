@@ -1,1 +1,5 @@
 # Fargo-Challenge
+
+This is a simple webapp which takes an URL of a website and creates a chatbot. The chatbot is trained to understand and respond to user queries based on the content extracted from the provided webpage. There are two ways for the users to engage with the bot, primarily, the traditional texting method where Users can ask questions by typing them into a text input field. The chatbot processes the queries and provides relevant responses based on the content of the website. Secondly, Users can ask questions through voice input via their microphone. The app captures the spoken question, converts it to text, and processes it to provide a response. 
+
+The LangChain framework is used to integrate RAG - Retrieval-Augmented Generation, which combines retrieval (fetching relevant documents from the website’s content) and generation (formulating a similar and contextually relevant response). The backend is built using Flask and the frontend is designed using basic HTML and CSS for layout and Javascript for dynamically handling the requests.
